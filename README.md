@@ -1,123 +1,144 @@
-Azure Terraform Core Infrastructure
+# Azure Infrastructure Provisioning with Terraform
 
-Overview
-This repository contains a production-style Azure infrastructure built using Terraform.
-The project is designed with scalability and reusability in mind, following real-world DevOps and platform engineering practices.
+## 📌 Overview
 
-The core idea of this setup is that infrastructure should scale by changing configuration (terraform.tfvars) and not by rewriting Terraform code.
+This repository contains **end-to-end Azure infrastructure provisioning** using **Terraform**, designed with **modularity, reusability, and scalability** in mind.
 
----
+All Azure resources are created using **`for_each` and `map(object)` patterns**, enabling clean configuration management and easy environment expansion (Dev / QA / Prod).
 
-Key Highlights
-
-* Modular Terraform structure
-* for_each and map(object) used across all resources
-* Secure secret handling using Azure Key Vault
-* Remote Terraform state stored in Azure Blob Storage
-* RBAC-based access control
-* Environment-ready structure (Env/Dev)
+The infrastructure is deployed via **Azure DevOps Pipeline**, with remote state management and secrets handled securely.
 
 ---
 
-Repository Structure
+## 🧱 Architecture Summary
 
-core
-├── Env
-│    └── Dev
-│         ├── provider.tf
-│         ├── main.tf
-│         ├── variables.tf
-│         └── terraform.tfvars
+The following resources are provisioned **entirely through Terraform**:
+
+* Resource Group
+* Virtual Network (VNet)
+* Subnets (including Azure Bastion Subnet)
+* Public IP
+* Azure Bastion
+* Linux Virtual Machine
+* Azure SQL Server
+* Azure SQL Database
+
+⚠️ **No application infrastructure is created manually**.
+
+---
+
+## 🔐 Bootstrap (Manual – One Time Only)
+
+The following components are **manually created once** to bootstrap Terraform:
+
+* Backend Resource Group
+* Azure Storage Account (Terraform remote state)
+* Blob Container (tfstate file)
+* Azure Key Vault (secrets)
+
+> Terraform does not manage its own backend or secret store.
+> These resources are intentionally excluded from Terraform state.
+
+---
+
+## 📂 Repository Structure
+
+```
+core/
+├── Env/
+│   └── Dev/
+│       ├── main.tf
+│       ├── provider.tf
+│       ├── variables.tf
+│       └── terraform.tfvars
 │
-└── Modules
-├── 01_resourcegroup
-├── 02_networking
-├── 03_public_ip
-├── 04_compute
-├── 05_bastion
-├── 06_sql_server
-└── 07_sql_database
-
-Each module represents a single responsibility and can be reused across environments.
-
----
-
-Core Design Principle
-
-All resources are created using for_each with map(object) variables.
-
-This allows:
-
-* Adding or removing resources without changing Terraform logic
-* Predictable and stable Terraform state
-* Easy extension to multiple environments like dev, qa, and prod
-
-Scaling the infrastructure only requires updating terraform.tfvars.
+├── Modules/
+│   ├── 01_resourcegroup
+│   ├── 02_networking
+│   ├── 03_public_ip
+│   ├── 04_compute
+│   ├── 05_bastion
+│   ├── 06_sql_server
+│   └── 07_sql_database
+│
+└── README.md
+```
 
 ---
 
-Security and Secrets Management
+## 🔁 Design Pattern Used
 
-Azure Key Vault is created manually through the Azure Portal.
+### ✅ `map(object)` + `for_each`
 
-* Secrets are stored manually
-* Terraform only reads secrets using data blocks
-* RBAC is used instead of access policies
-* No secrets are hardcoded or committed to Git
+All resources are defined using **map-based configurations** in `terraform.tfvars` and iterated using `for_each` inside modules.
 
-Currently used secrets:
+### Why this approach?
 
-* VM admin username
-* VM admin password
-* SQL admin credentials
+* Avoids duplicate code
+* Enables multiple resources from a single module
+* Makes infra **environment-driven**
+* Easy to scale (add more VMs, VNets, DBs by config only)
 
----
+### Example (conceptual):
 
-Terraform Backend
+```hcl
+for_each = var.network
+```
 
-Terraform state is stored remotely using Azure Blob Storage.
-
-This ensures:
-
-* Centralized state management
-* Safe state locking
-* Team collaboration readiness
-
-Backend configuration is defined in provider.tf.
+Infrastructure behavior changes by **updating tfvars only**, not Terraform logic.
 
 ---
 
-Terraform Workflow
+## ⚙️ Environment Configuration
 
-terraform init -reconfigure
-terraform plan
-terraform apply
+Each environment (Dev / QA / Prod) can have its own:
 
-Authentication:
+* `terraform.tfvars`
+* Resource sizing
+* Locations
+* Naming conventions
 
-* Local execution uses Azure CLI login
-* Pipeline execution uses Azure DevOps Service Connection
-
----
-
-Why This Project
-
-This project intentionally avoids:
-
-* Hardcoded values
-* count-based resources
-* Inline secrets
-* Large monolithic Terraform files
-
-Instead, it follows patterns commonly used by platform and DevOps teams in real production environments.
+This repository currently demonstrates the **Dev environment**.
 
 ---
 
-Planned Enhancements
+## 🚀 Deployment Flow
 
-* Azure DevOps YAML pipeline
-* Multi-environment support (qa, prod)
-* Private Endpoints (phase 2)
-* Policy as Code
-* Cost and tagging strategy
+1. Code pushed to GitHub
+2. Azure DevOps Pipeline triggered
+3. Terraform initializes remote backend
+4. Terraform plan & apply executed
+5. Azure infrastructure provisioned successfully
+
+---
+
+## 🔒 Security Practices
+
+* No secrets hardcoded in Terraform
+* Credentials stored in **Azure Key Vault**
+* Remote state stored securely in **Azure Storage Account**
+* No Public IP on VM (Bastion used for access)
+
+---
+
+## 🧠 Key Takeaways
+
+* Backend and secrets are bootstrapped manually (best practice)
+* All infra is Terraform-managed
+* Modular, scalable, environment-agnostic design
+* Uses **real-world DevOps patterns**, not demo shortcuts
+
+---
+
+## 🎯 Interview-Ready Summary
+
+> “This project provisions Azure infrastructure using Terraform modules with `for_each` and map-based configurations, backed by a remote state and secure secret management. Only the backend and Key Vault are manually bootstrapped; everything else is fully declarative and pipeline-driven.”
+
+---
+
+## ✅ Status
+
+✔ Infrastructure deployed successfully
+✔ Pipeline executed without errors
+✔ Repository is source of truth
 
