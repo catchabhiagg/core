@@ -8,7 +8,7 @@ rg = {
 network = {
   network1 = {
     name                = "vnetcore"
-    location            = "East US"
+    location            = "southafricanorth"
     resource_group_name = "rg-core-01"
     subnet = {
       subnet1 = {
@@ -27,7 +27,7 @@ ip = {
   ip1 = {
     name                = "pipcore"
     resource_group_name = "rg-core-01"
-    location            = "East US"
+    location            = "southafricanorth"
   }
 }
 
@@ -35,8 +35,9 @@ linux = {
   linux1 = {
     vmname              = "corevm"
     resource_group_name = "rg-core-01"
-    location            = "East US"
-    size                = "Standard_F2"
+    location            = "southafricanorth"
+    size                = "Standard_D2ls_v5"
+    // zone                = "1"
     nicname             = "corenic"
     ip_configuration = {
       ip_configuration1 = {
@@ -50,7 +51,7 @@ linux = {
 bastion = {
   bastion1 = {
     bastion_name        = "corebastion"
-    location            = "East US"
+    location            = "southafricanorth"
     resource_group_name = "rg-core-01"
     ip_configuration = {
       ip_configuration1 = {
@@ -61,20 +62,20 @@ bastion = {
   }
 }
 
-keyvault = {
-  core = {
-    name                = "corekvsecure"
-    location            = "East US"
-    resource_group_name = "infra_core"
-  }
-}
+// keyvault = {
+//   core = {
+//     name                = "corekvsecure"
+//     location            = "East US"
+//     resource_group_name = "infra_core"
+//   }
+// }
 
 
 sqlserver = {
   sqlserver1 = {
     name                         = "coresqlserver"
     resource_group_name          = "rg-core-01"
-    location                     = "East US"
+    location                     = "southafricanorth"
     administrator_login          = "coreadmin"
     administrator_login_password = "core@admin123"
   }

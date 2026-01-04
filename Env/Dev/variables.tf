@@ -50,13 +50,13 @@ variable "rg" {
   }))
 }
 
-variable "keyvault" {
-  type = map(object({
-    name                = string
-    location            = string
-    resource_group_name = string
-  }))
-}
+// variable "keyvault" {
+//   type = map(object({
+//     name                = string
+//     location            = string
+//     resource_group_name = string
+//   }))
+// }
 
 variable "sqlserver" {
   type = map(object({
